@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BMW F 900 GS - 2-Step, Pops, Nitro & Lenta Variable</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+        body {
+            background-color: #0b0c10;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .painel-container {
+            background: linear-gradient(145deg, #1f2833, #0b0c10);
+            border: 4px solid #d11a2a;
+            border-radius: 20px;
+            padding: 18px;
+            width: 95%;
+            max-width: 480px;
+            box-shadow: 0 0 30px rgba(209, 26, 42, 0.3);
+            text-align: center;
+        }
+
+        .btn-partida {
+            background-color: #ff3333;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 15px rgba(255, 51, 51, 0.4);
+            width: 100%;
+        }
+        .btn-partida.ligado {
+            background-color: #00ff55;
+            color: #000;
+            box-shadow: 0 4px 15px rgba(0, 255, 85, 0.5);
+        }
+
+        .grid-cabine {
+            display: grid;
+            grid-template-columns: 1.5fr 1.5fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .display-digital {
+            background-color: #1f2833;
+            border: 2px solid #d11a2a;
+            border-radius: 10px;
+            padding: 8px;
+            font-family: monospace;
+            font-size: 1.3rem;
+            color: #ff3333;
+            text-shadow: 0 0 10px rgba(255, 51, 51, 0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .display-digital span {
+            font-size: 0.65rem;
+            color: #a4b3b6;
+            text-transform: uppercase;
+        }
+
+        .velocimetro {
+            color: #00e5ff;
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.6);
+            font-size: 1.7rem !important;
+            font-weight: bold;
+        }
+
+        .display-marcha {
+            background-color: #151b23;
+            border: 2px solid #d11a2a;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #ffcc00;
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .display-marcha span {
+            font-size: 0.6rem;
+            color: #a4b3b6;
+        }
+        .display-marcha.neutro {
+            color: #00ff55;
+            text-shadow: 0 0 10px rgba(0, 255, 85, 0.6);
+        }
+
+        .barra-rpm-container {
+            background-color: #0b0c10;
+            border-radius: 10px;
+            height: 20px;
+            width: 100%;
+            overflow: hidden;
+            margin-bottom: 12px;
+            border: 1px solid #444;
+        }
+        .barra-rpm-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00ff55 60%, #ffcc00 85%, #ff3333 98%);
+            transition: width 0.02s linear;
+        }
+
+        /* PAINEL DE BOTÕES DE EFEITO */
+        .painel-efeitos {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .btn-toggle-efeito {
+            background: #151b23;
+            color: #888;
+            border: 2px solid #444;
+            padding: 8px 6px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+
+        .btn-toggle-efeito.ativo {
+            border-color: #ffaa00;
+            color: #fff;
+            background: #2b2200;
+            box-shadow: 0 0 12px rgba(255, 170, 0, 0.4);
+        }
+
+        #btnNitro.ativo {
+            border-color: #00e5ff;
+            background: #002b33;
+            color: #fff;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.6);
+        }
+
+        .led-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #444;
+        }
+
+        .btn-toggle-efeito.ativo .led-status {
+            background-color: #ffaa00;
+            box-shadow: 0 0 8px #ffaa00;
+        }
+
+        #btnNitro.ativo .led-status {
+            background-color: #00e5ff;
+            box-shadow: 0 0 8px #00e5ff;
+        }
+
+        .controles-mecanicos {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .grupo-cambio {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .btn-cambio {
+            background-color: #1f2833;
+            color: #fff;
+            border: 2px solid #d11a2a;
+            padding: 8px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            touch-action: manipulation;
+        }
+        .btn-cambio:active {
+            background-color: #d11a2a;
+        }
+
+        .btn-frear {
+            background: linear-gradient(135deg, #4d0000, #990000);
+            color: white;
+            border: 2px solid #ff3333;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            touch-action: manipulation;
+        }
+        .btn-frear:active {
+            background: #ff3333;
+            box-shadow: 0 0 15px #ff3333;
+        }
+
+        .controle-grupo {
+            margin-bottom: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+        label {
+            font-size: 0.7rem;
+            color: #c5c6c7;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+        .valor-dinamico {
+            color: #ff3333;
+            font-family: monospace;
+        }
+
+        .slider-custom {
+            -webkit-appearance: none;
+            width: 90%;
+            height: 8px;
+            border-radius: 10px;
+            background: #222;
+            outline: none;
+            cursor: pointer;
+            touch-action: pan-x;
+        }
+        
+        #manopla::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #d11a2a;
+            border: 3px solid #fff;
+        }
+
+        #ajusteLenta::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #00ff55;
+        }
+
+        #ajusteCorte::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #fff;
+        }
+
+        #ajusteTwoStep::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #ffaa00;
+        }
+        
+        .aviso-audio {
+            font-size: 0.7rem;
+            color: #a4b3b6;
+            margin-top: 4px;
+            line-height: 1.2;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="painel-container">
+        <button id="btnChave" class="btn-partida">Dar Partida ⚡</button>
+        
+        <div class="grid-cabine">
+            <div class="display-digital">
+                <span id="displayRPM">1.500 RPM</span>
+                <span>Giro</span>
+            </div>
+            <div class="display-digital">
+                <span class="velocimetro" id="displayVelocidade">0 km/h</span>
+                <span>Velocidade</span>
+            </div>
+            <div class="display-marcha neutro" id="displayMarcha">
+                N
+                <span>Marcha</span>
+            </div>
+        </div>
+        
+        <div class="barra-rpm-container">
+            <div class="barra-rpm-fill" id="barraRPM"></div>
+        </div>
+
+        <!-- BOTÕES DEDICADOS -->
+        <div class="painel-efeitos">
+            <button id="btnTwoStep" class="btn-toggle-efeito">
+                <span>🔥 2-Step</span>
+                <div class="led-status"></div>
+            </button>
+            <button id="btnPopsBangs" class="btn-toggle-efeito">
+                <span>💥 Pops</span>
+                <div class="led-status"></div>
+            </button>
+            <button id="btnNitro" class="btn-toggle-efeito">
+                <span>🚀 Nitro</span>
+                <div class="led-status"></div>
+            </button>
+        </div>
+
+        <div class="controles-mecanicos">
+            <div class="grupo-cambio">
+                <button class="btn-cambio" id="btnSobeMarcha">Marcha + ⬆️</button>
+                <button class="btn-cambio" id="btnDesceMarcha">Marcha - ⬇️</button>
+            </div>
+            <button class="btn-frear" id="btnFreio">Desacelerar / Frear 🛑</button>
+        </div>
+
+        <!-- NOVO CONTROLE DE MARCHA LENTA -->
+        <div class="controle-grupo">
+            <label for="ajusteLenta">Marcha Lenta: <span id="labelLenta" class="valor-dinamico" style="color: #00ff55;">1.500 RPM</span></label>
+            <input type="range" id="ajusteLenta" class="slider-custom" min="1" max="7000" step="50" value="1500">
+        </div>
+
+        <div class="controle-grupo">
+            <label for="ajusteTwoStep">2-Step Limitador: <span id="labelTwoStep" class="valor-dinamico">5.500 RPM</span></label>
+            <input type="range" id="ajusteTwoStep" class="slider-custom" min="3000" max="8000" step="250" value="5500">
+        </div>
+
+        <div class="controle-grupo">
+            <label for="ajusteCorte">Corte Principal: <span id="labelCorte" class="valor-dinamico">9.000 RPM</span></label>
+            <input type="range" id="ajusteCorte" class="slider-custom" min="5000" max="14000" step="500" value="9000">
+        </div>
+
+        <div class="controle-grupo">
+            <label for="manopla">Acelerador:</label>
+            <input type="range" id="manopla" class="slider-custom" min="0" max="1" step="0.01" value="0">
+        </div>
+        
+        <div class="aviso-audio">
+            BMW F 900 GS - Sistema de Controle de Lançamento & Lenta
+        </div>
+    </div>
+
+    <script>
+        const manopla = document.getElementById('manopla');
+        const displayRPM = document.getElementById('displayRPM');
+        const displayVelocidade = document.getElementById('displayVelocidade');
+        const displayMarcha = document.getElementById('displayMarcha');
+        const barraRPM = document.getElementById('barraRPM');
+        const btnChave = document.getElementById('btnChave');
+        const ajusteLenta = document.getElementById('ajusteLenta');
+        const labelLenta = document.getElementById('labelLenta');
+        const ajusteCorte = document.getElementById('ajusteCorte');
+        const labelCorte = document.getElementById('labelCorte');
+        const ajusteTwoStep = document.getElementById('ajusteTwoStep');
+        const labelTwoStep = document.getElementById('labelTwoStep');
+        const btnFreio = document.getElementById('btnFreio');
+        const btnSobeMarcha = document.getElementById('btnSobeMarcha');
+        const btnDesceMarcha = document.getElementById('btnDesceMarcha');
+        const btnTwoStep = document.getElementById('btnTwoStep');
+        const btnPopsBangs = document.getElementById('btnPopsBangs');
+        const btnNitro = document.getElementById('btnNitro');
+
+        let rpmMinimo = parseInt(ajusteLenta.value);             
+        let rpmMaximoAbsoluto = 9500;    
+        let rpmAtual = rpmMinimo;
+        let limiteCorteGiro = parseInt(ajusteCorte.value);
+        let limiteTwoStep = parseInt(ajusteTwoStep.value);
+
+        let velocidadeAtual = 0;
+        let emCorte = false;
+        let tempoCorte = 0;
+        let pressionandoFreio = false;
+        let corteQuickshifter = false;
+
+        // Estados dos Efeitos
+        let twoStepAtivo = false;
+        let popsBangsAtivo = false;
+        let nitroAtivo = false;
+        let ultimoAcelerador = 0;
+        let cooldownPops = false;
+
+        const sequenciaMarchas = ["1", "N", "2", "3", "4", "5", "6"];
+        let indiceMarcha = 1;
+
+        const relacaoMarchas = {
+            "N": { aceleracao: 1.0, freioMotor: 0.5, velMax: 0, velMin: 0 },
+            "1": { aceleracao: 3.2, freioMotor: 0.9, velMax: 60, velMin: 0 },
+            "2": { aceleracao: 2.2, freioMotor: 0.8, velMax: 95, velMin: 15 },
+            "3": { aceleracao: 1.6, freioMotor: 0.65, velMax: 130, velMin: 35 },
+            "4": { aceleracao: 1.2, freioMotor: 0.55, velMax: 165, velMin: 55 },
+            "5": { aceleracao: 0.9, freioMotor: 0.45, velMax: 195, velMin: 75 },
+            "6": { aceleracao: 0.7, freioMotor: 0.35, velMax: 228, velMin: 95 }
+        };
+
+        // Audio System
+        let audioCtx = null;
+        let osc1 = null, osc2 = null;
+        let ganho1 = null, ganho2 = null;
+        let filtroGrave = null;
+        let chaveLigada = false;
+
+        function inicializarAudio() {
+            if (audioCtx) return;
+            
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            
+            filtroGrave = audioCtx.createBiquadFilter();
+            filtroGrave.type = 'lowpass';
+            filtroGrave.frequency.setValueAtTime(220, audioCtx.currentTime); 
+            filtroGrave.Q.setValueAtTime(4, audioCtx.currentTime); 
+            filtroGrave.connect(audioCtx.destination);
+
+            osc1 = audioCtx.createOscillator();
+            osc1.type = 'sawtooth';
+            ganho1 = audioCtx.createGain();
+            ganho1.gain.setValueAtTime(0.3, audioCtx.currentTime); 
+            osc1.connect(ganho1);
+            ganho1.connect(filtroGrave);
+            osc1.start();
+
+            osc2 = audioCtx.createOscillator();
+            osc2.type = 'sawtooth';
+            ganho2 = audioCtx.createGain();
+            ganho2.gain.setValueAtTime(0.3, audioCtx.currentTime); 
+            
+            let delayNode = audioCtx.createDelay();
+            delayNode.delayTime.setValueAtTime(0.027, audioCtx.currentTime); 
+            
+            osc2.connect(ganho2);
+            ganho2.connect(delayNode);
+            delayNode.connect(filtroGrave);
+            osc2.start();
+        }
+
+        function gerarPipocoSintetizado(volume = 1.0, grave = false) {
+            if (!audioCtx || !chaveLigada) return;
+
+            const duracao = 0.04 + (Math.random() * 0.05);
+            const bufferSize = audioCtx.sampleRate * duracao;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const output = buffer.getChannelData(0);
+
+            for (let i = 0; i < bufferSize; i++) {
+                output[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.25));
+            }
+
+            const noiseNode = audioCtx.createBufferSource();
+            noiseNode.buffer = buffer;
+
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = grave ? 'lowpass' : 'bandpass';
+            filter.frequency.value = grave ? (100 + Math.random() * 280) : (300 + Math.random() * 1800);
+            filter.Q.value = 2.0;
+
+            const gainNode = audioCtx.createGain();
+            gainNode.gain.setValueAtTime(volume * 1.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duracao);
+
+            noiseNode.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            noiseNode.start();
+        }
+
+        function dispararRajadaPops(intensidade = 1) {
+            if (cooldownPops || !chaveLigada) return;
+            cooldownPops = true;
+
+            let qtdPipocos = Math.floor(Math.random() * 8 * intensidade) + 8;
+            
+            for (let i = 0; i < qtdPipocos; i++) {
+                let delayProvisorio = i * (45 + Math.random() * 75);
+                setTimeout(() => {
+                    if (chaveLigada) {
+                        let vol = 0.85 + Math.random() * 0.65;
+                        gerarPipocoSintetizado(vol, Math.random() > 0.25);
+                    }
+                }, delayProvisorio);
+            }
+
+            setTimeout(() => { cooldownPops = false; }, 650);
+        }
+
+        btnTwoStep.addEventListener('click', () => {
+            twoStepAtivo = !twoStepAtivo;
+            btnTwoStep.classList.toggle('ativo', twoStepAtivo);
+        });
+
+        btnPopsBangs.addEventListener('click', () => {
+            popsBangsAtivo = !popsBangsAtivo;
+            btnPopsBangs.classList.toggle('ativo', popsBangsAtivo);
+        });
+
+        btnNitro.addEventListener('click', () => {
+            nitroAtivo = !nitroAtivo;
+            btnNitro.classList.toggle('ativo', nitroAtivo);
+        });
+
+        function mudarMarcha(direcao) {
+            if (!chaveLigada) return;
+
+            let novoIndice = indiceMarcha + direcao;
+            
+            if (novoIndice >= 0 && novoIndice < sequenciaMarchas.length) {
+                let marchaAnterior = sequenciaMarchas[indiceMarcha];
+                indiceMarcha = novoIndice;
+                let marcha = sequenciaMarchas[indiceMarcha];
+                
+                displayMarcha.innerHTML = "";
+                const textoMarcha = document.createTextNode(marcha);
+                displayMarcha.appendChild(textoMarcha);
+                
+                let spanLabel = document.createElement('span');
+                spanLabel.innerText = "Marcha";
+                displayMarcha.appendChild(spanLabel);
+
+                if (marcha === "N") {
+                    displayMarcha.classList.add('neutro');
+                } else {
+                    displayMarcha.classList.remove('neutro');
+                }
+
+                if (audioCtx) {
+                    corteQuickshifter = true;
+                    ganho1.gain.setValueAtTime(0.05, audioCtx.currentTime); 
+                    ganho2.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                    
+                    if (popsBangsAtivo && (direcao < 0 || marcha === "N" || rpmAtual >= limiteTwoStep)) {
+                        dispararRajadaPops(1.8);
+                    }
+
+                    setTimeout(() => {
+                        corteQuickshifter = false;
+                        if (chaveLigada && !emCorte) {
+                            let inputAcelerador = parseFloat(manopla.value);
+                            let volumeGeral = inputAcelerador > 0 ? (0.45 + (inputAcelerador * 0.45)) : 0.25;
+                            ganho1.gain.setValueAtTime(volumeGeral, audioCtx.currentTime);
+                            ganho2.gain.setValueAtTime(volumeGeral, audioCtx.currentTime);
+                        }
+                    }, 45); 
+                }
+
+                if (marcha !== "N") {
+                    let marchaInfo = relacaoMarchas[marcha];
+                    if (velocidadeAtual > 0) {
+                        let proporcaoVel = velocidadeAtual / marchaInfo.velMax;
+                        rpmAtual = rpmMinimo + (proporcaoVel * (limiteCorteGiro - rpmMinimo));
+                    } else {
+                        rpmAtual = rpmMinimo;
+                    }
+                } else {
+                    rpmAtual = Math.max(rpmMinimo, rpmAtual * 0.85);
+                }
+            }
+        }
+
+        btnSobeMarcha.addEventListener('pointerdown', (e) => { e.preventDefault(); mudarMarcha(1); });
+        btnDesceMarcha.addEventListener('pointerdown', (e) => { e.preventDefault(); mudarMarcha(-1); });
+
+        // EVENTO DA LENTA
+        ajusteLenta.addEventListener('input', (e) => {
+            rpmMinimo = parseInt(e.target.value);
+            labelLenta.innerText = rpmMinimo.toLocaleString('pt-BR') + " RPM";
+        });
+
+        ajusteCorte.addEventListener('input', (e) => {
+            limiteCorteGiro = parseInt(e.target.value);
+            rpmMaximoAbsoluto = limiteCorteGiro + 1000;
+            labelCorte.innerText = limiteCorteGiro.toLocaleString('pt-BR') + " RPM";
+        });
+
+        ajusteTwoStep.addEventListener('input', (e) => {
+            limiteTwoStep = parseInt(e.target.value);
+            labelTwoStep.innerText = limiteTwoStep.toLocaleString('pt-BR') + " RPM";
+        });
+
+        btnFreio.addEventListener('pointerdown', (e) => { e.preventDefault(); pressionandoFreio = true; });
+        btnFreio.addEventListener('pointerup', () => { pressionandoFreio = false; });
+        btnFreio.addEventListener('pointerleave', () => { pressionandoFreio = false; });
+
+        const soltarManopla = () => { manopla.value = 0; };
+        manopla.addEventListener('pointerup', soltarManopla);
+        manopla.addEventListener('touchend', soltarManopla);
+
+        // Loop principal (60 FPS)
+        setInterval(() => {
+            let inputAcelerador = parseFloat(manopla.value);
+
+            if (!chaveLigada) {
+                manopla.value = 0;
+                velocidadeAtual = 0;
+                displayVelocidade.innerText = "0 km/h";
+                return;
+            }
+
+            let marcha = sequenciaMarchas[indiceMarcha];
+            let marchaInfo = relacaoMarchas[marcha];
+
+            let limiteAtual = limiteCorteGiro;
+            let usandoTwoStep = twoStepAtivo && inputAcelerador > 0.85;
+
+            if (usandoTwoStep) {
+                limiteAtual = limiteTwoStep;
+            }
+
+            let desacelerando = (inputAcelerador < ultimoAcelerador - 0.05) || pressionandoFreio;
+            if (popsBangsAtivo && desacelerando && rpmAtual >= limiteTwoStep) {
+                dispararRajadaPops(1.5);
+            }
+            ultimoAcelerador = inputAcelerador;
+
+            let fatorNitro = (nitroAtivo && inputAcelerador > 0) ? 2.8 : 1.0;
+
+            if (emCorte) {
+                tempoCorte += 16.6;
+                let cadenciaCorte = usandoTwoStep ? 18 : (limiteAtual > 10000 ? 35 : 65);
+                
+                if (tempoCorte >= cadenciaCorte) {
+                    if (usandoTwoStep) {
+                        rpmAtual -= (limiteAtual * 0.05);
+                        gerarPipocoSintetizado(1.2, true); 
+                        if (Math.random() > 0.4) {
+                            setTimeout(() => gerarPipocoSintetizado(1.0, false), 8);
+                        }
+                    } else if (marcha === "N") {
+                        rpmAtual -= (limiteAtual * 0.08);
+                    } else {
+                        rpmAtual -= (limiteAtual * 0.03); 
+                    }
+                    emCorte = false;
+                    tempoCorte = 0;
+                }
+            } else if (!corteQuickshifter) {
+                
+                if (marcha === "N") {
+                    if (pressionandoFreio) {
+                        rpmAtual -= 250;
+                    } else if (inputAcelerador > 0) {
+                        rpmAtual += (inputAcelerador * 650 * fatorNitro);
+                    } else {
+                        // Decai suavemente ou sobe dinamicamente em direção ao valor ajustado da Lenta
+                        if (rpmAtual > rpmMinimo) {
+                            rpmAtual -= 300;
+                            if (rpmAtual < rpmMinimo) rpmAtual = rpmMinimo;
+                        } else if (rpmAtual < rpmMinimo) {
+                            rpmAtual += 200;
+                            if (rpmAtual > rpmMinimo) rpmAtual = rpmMinimo;
+                        }
+                    }
+
+                    if (rpmAtual >= limiteAtual) {
+                        rpmAtual = limiteAtual;
+                        emCorte = true;
+                    }
+                    
+                    if (pressionandoFreio) {
+                        velocidadeAtual -= 3.5;
+                    } else {
+                        velocidadeAtual -= 0.15;
+                    }
+                } 
+                else {
+                    if (pressionandoFreio) {
+                        velocidadeAtual -= 2.8;
+                    } else if (inputAcelerador > 0) {
+                        let taxaAcel = (inputAcelerador * 0.09) * marchaInfo.aceleracao * fatorNitro;
+                        velocidadeAtual += taxaAcel;
+                    } else {
+                        velocidadeAtual -= 0.3 * marchaInfo.freioMotor;
+                    }
+
+                    if (velocidadeAtual < 0) velocidadeAtual = 0;
+                    if (velocidadeAtual > marchaInfo.velMax) velocidadeAtual = marchaInfo.velMax;
+
+                    let proporcaoVelocidade = velocidadeAtual / marchaInfo.velMax;
+                    rpmAtual = rpmMinimo + (proporcaoVelocidade * (limiteCorteGiro - rpmMinimo));
+
+                    if (rpmAtual >= limiteAtual) {
+                        rpmAtual = limiteAtual;
+                        emCorte = true;
+                    }
+                }
+            }
+
+            if (rpmAtual < rpmMinimo) rpmAtual = rpmMinimo;
+            if (rpmAtual > rpmMaximoAbsoluto) rpmAtual = rpmMaximoAbsoluto;
+            if (velocidadeAtual < 0) velocidadeAtual = 0;
+
+            // VISUAL
+            displayRPM.innerText = Math.round(rpmAtual).toLocaleString('pt-BR') + " RPM";
+            displayVelocidade.innerText = Math.round(velocidadeAtual) + " km/h";
+            
+            let percentualVisual = ((rpmAtual - 1) / (rpmMaximoAbsoluto - 1)) * 100;
+            barraRPM.style.width = `${percentualVisual}%`;
+
+            // ÁUDIO REALISTA
+            if (audioCtx && osc1 && osc2 && !corteQuickshifter) {
+                if (emCorte) {
+                    ganho1.gain.setValueAtTime(0, audioCtx.currentTime);
+                    ganho2.gain.setValueAtTime(0, audioCtx.currentTime);
+                } else {
+                    let volumeGeral = inputAcelerador > 0 ? (0.45 + (inputAcelerador * 0.45)) : 0.25;
+                    
+                    if (marcha !== "N" && inputAcelerador > 0) {
+                        volumeGeral += (0.08 * (6 - indiceMarcha)); 
+                    }
+
+                    ganho1.gain.setValueAtTime(volumeGeral, audioCtx.currentTime);
+                    ganho2.gain.setValueAtTime(volumeGeral, audioCtx.currentTime);
+
+                    let freqBase = rpmAtual / 100;
+                    let frequenciaFiltroDinamica = 220 + (rpmAtual / 25);
+                    
+                    if (nitroAtivo && inputAcelerador > 0) {
+                        frequenciaFiltroDinamica += 600;
+                    }
+
+                    filtroGrave.frequency.setValueAtTime(frequenciaFiltroDinamica, audioCtx.currentTime);
+
+                    osc1.frequency.setValueAtTime(freqBase, audioCtx.currentTime);
+                    osc2.frequency.setValueAtTime(freqBase * 1.005, audioCtx.currentTime);
+                }
+            }
+
+        }, 1000 / 60);
+
+        btnChave.addEventListener('click', () => {
+            if (!chaveLigada) {
+                inicializarAudio();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                chaveLigada = true;
+                rpmAtual = rpmMinimo;
+                btnChave.innerText = "F 900 GS Ligada 🏍️";
+                btnChave.classList.add('ligado');
+            } else {
+                chaveLigada = false;
+                btnChave.innerText = "Dar Partida ⚡";
+                btnChave.classList.remove('ligado');
+                velocidadeAtual = 0;
+                if (ganho1 && ganho2) {
+                    ganho1.gain.setValueAtTime(0, audioCtx.currentTime);
+                    ganho2.gain.setValueAtTime(0, audioCtx.currentTime);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
